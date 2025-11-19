@@ -1,0 +1,255 @@
+@reference "tailwindcss";
+
+@plugin "tailwindcss-animate";
+
+@custom-variant dark (&:is(.dark *));
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    margin: 0;
+  }
+
+}
+
+@layer components {
+  /* main */
+  .main-container {
+    display:flex;
+    min-height: calc(100vh - 4rem); /* 减去topbar的高度 */
+    width: 100%;
+    padding-top: 4rem; 
+    padding-left: 16rem; 
+    padding-right: 0;
+    box-sizing: border-box;
+  }
+
+  /* 启用右侧边栏时的主容器样式 */
+  /* .main-container.with-rightsidebar {
+    padding-right: 16rem;
+  } */
+
+  /* topbar */
+  .topbar {
+    @apply fixed top-0 z-50 flex w-full items-center justify-between bg-gray-900/95 border-b border-gray-800 px-4 py-2 backdrop-blur-sm;
+  }
+
+  /* leftsidebar */
+  .leftsidebar {
+    @apply fixed top-16 bottom-16 left-0 z-40 flex h-[calc(100vh-11rem)] w-16 flex-col items-center justify-between bg-gray-900 border-r border-gray-800 px-2 py-6 transition-all duration-300 ease-in-out;
+    /* 添加悬停效果 */
+  }
+
+  .leftsidebar {
+    @apply w-64 shadow-lg;
+  }
+
+  .leftsidebar_link {
+    @apply flex items-center justify-center gap-2 rounded-lg p-2 text-gray-400 transition-all duration-300 ease-in-out hover:bg-gray-800 hover:text-white;
+    /* 扩展链接尺寸 */
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .leftsidebar .leftsidebar_link {
+    @apply justify-start pl-3 w-auto;
+  }
+
+  /* rightsidebar */
+  .rightsidebar {
+    @apply fixed top-16 bottom-16 right-0 z-30 hidden h-[calc(100vh-11rem)] w-[16rem] flex-col overflow-y-auto border-l border-gray-800 bg-gray-900 px-4 py-6 shadow-lg transition-all duration-300 ease-in-out lg:block;
+    /* 滚动条样式 */
+  }
+
+  .rightsidebar::-webkit-scrollbar {
+    @apply w-1.5;
+  }
+
+  .rightsidebar::-webkit-scrollbar-track {
+    @apply bg-gray-800;
+  }
+
+  .rightsidebar::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-gray-600 hover:bg-gray-500;
+  }
+
+  /* bottombar - 主要用于移动设备 */
+  .bottombar {
+    @apply fixed bottom-0 z-40 flex w-full items-center justify-between border-t border-gray-800 bg-gray-900/95 px-4 py-2 backdrop-blur-sm md:hidden;
+  }
+
+  .bottombar_container {
+    @apply flex items-center justify-between w-full;
+  }
+
+  .bottombar_link {
+    @apply flex flex-col items-center justify-center gap-1 rounded-lg p-2 text-gray-400 transition-all duration-300 ease-in-out hover:bg-gray-800 hover:text-white;
+  }
+
+  /* 响应式调整 */
+  @screen md {
+    .main-container {
+      padding-left: 4rem; /* md屏幕下左侧边栏宽度 */
+    }
+  }
+
+  @screen lg {
+    .main-container {
+      padding-left: 16rem; /* lg屏幕下左侧边栏宽度 */
+    }
+
+    .main-container.with-rightsidebar {
+      padding-right: 16rem; /* 启用右侧边栏时的右侧内边距 */
+    }
+  }
+
+  /* 链接激活状态 */
+  .leftsidebar_link.active,
+    .bottombar_link.active {
+      @apply bg-blue-900/30 text-blue-400;
+    }
+
+  /* 通用滚动条样式 */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #4B5563 #1F2937;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #1F2937;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #4B5563;
+    border-radius: 3px;
+  }
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.129 0.042 264.695);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.129 0.042 264.695);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.129 0.042 264.695);
+  --primary: oklch(0.208 0.042 265.755);
+  --primary-foreground: oklch(0.984 0.003 247.858);
+  --secondary: oklch(0.968 0.007 247.896);
+  --secondary-foreground: oklch(0.208 0.042 265.755);
+  --muted: oklch(0.968 0.007 247.896);
+  --muted-foreground: oklch(0.554 0.046 257.417);
+  --accent: oklch(0.968 0.007 247.896);
+  --accent-foreground: oklch(0.208 0.042 265.755);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.929 0.013 255.508);
+  --input: oklch(0.929 0.013 255.508);
+  --ring: oklch(0.704 0.04 256.788);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.984 0.003 247.858);
+  --sidebar-foreground: oklch(0.129 0.042 264.695);
+  --sidebar-primary: oklch(0.208 0.042 265.755);
+  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-accent: oklch(0.968 0.007 247.896);
+  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
+  --sidebar-border: oklch(0.929 0.013 255.508);
+  --sidebar-ring: oklch(0.704 0.04 256.788);
+
+}
+
+.dark {
+  --background: oklch(0.129 0.042 264.695);
+  --foreground: oklch(0.984 0.003 247.858);
+  --card: oklch(0.208 0.042 265.755);
+  --card-foreground: oklch(0.984 0.003 247.858);
+  --popover: oklch(0.208 0.042 265.755);
+  --popover-foreground: oklch(0.984 0.003 247.858);
+  --primary: oklch(0.929 0.013 255.508);
+  --primary-foreground: oklch(0.208 0.042 265.755);
+  --secondary: oklch(0.279 0.041 260.031);
+  --secondary-foreground: oklch(0.984 0.003 247.858);
+  --muted: oklch(0.279 0.041 260.031);
+  --muted-foreground: oklch(0.704 0.04 256.788);
+  --accent: oklch(0.279 0.041 260.031);
+  --accent-foreground: oklch(0.984 0.003 247.858);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.551 0.027 264.364);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.208 0.042 265.755);
+  --sidebar-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-accent: oklch(0.279 0.041 260.031);
+  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.551 0.027 264.364);
+
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+
+  }
+  body {
+    @apply bg-background text-foreground;
+
+  }
+
+}
+
