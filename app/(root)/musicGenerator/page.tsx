@@ -1,20 +1,20 @@
 import MusicGeneratorForm from '../../../components/musicgeneratorui/MusicGeneratorForm';
 import Link from 'next/link';
 
-const ImageGenerator = () => {
+const MusicGenerator = () => {
   return (
     <div className="min-h-full bg-gradient-to-b from-gray-900 to-gray-800 text-white p-4 md:p-6 lg:p-8">
       
       <header className="py-10 px-4 text-center mb-8">
         <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
-          AI Image Generator
+          AI Music Generator
         </h1>
         <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-          创建独特的图片作品，只需描述你的图片风格和情感
+          创建独特的音乐作品，只需描述你的音乐风格和情感
         </p>
       </header>
       <main className="max-w-6xl mx-auto">
-        <h1>生成组件</h1>
+        <MusicGeneratorForm />
     </main>
     <div className="text-center mt-8 mb-4">
       <Link 
@@ -31,4 +31,4 @@ const ImageGenerator = () => {
   )
 }
 
-export default ImageGenerator
+export default MusicGenerator

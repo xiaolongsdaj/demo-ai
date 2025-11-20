@@ -1,9 +1,27 @@
-import { Search, Home, Heart, Users, UserPlus, LogOut } from "lucide-react";
+import {
+  Search,
+  Home,
+  Heart,
+  UserPlus,
+  Music,
+  Image,
+} from "lucide-react";
+//侧边栏遍历
 export const sidebarLinks = [
   {
     imgURL: Home,
     route: "/",
     label: "Home",
+  },
+  {
+    imgURL: Music,
+    route: "/musicGenerator",
+    label: "MusicGenerator",
+  },
+  {
+    imgURL: Image,
+    route: "/imageGenerator",
+    label: "ImageGenerator",
   },
   {
     imgURL: Search,
@@ -15,55 +33,10 @@ export const sidebarLinks = [
     route: "/activity",
     label: "Activity",
   },
-  {
-    imgURL: Users,
-    route: "/imageGenerator",
-    label: "ImageGenerator",
-  },
+
   {
     imgURL: UserPlus,
     route: "/community",
     label: "Community",
-  },
-];
-export const ProfileTabs = [
-  {
-    value: "threads",
-    icon: UserPlus,
-    label: "Threads",
-    route: "/profile/threads",
-  },
-  {
-    value: "replies",
-    icon: Users,
-    label: "Replies",
-    route: "/profile/replies",
-  },
-  {
-    value: "tagged",
-    icon: Heart,
-    label: "Tagged",
-    route: "/profile/tagged",
-  },
-];
-
-export const CommunitiesTabs = [
-  {
-    value: "threads",
-    icon: Users,
-    label: "Threads",
-    route: "/communities/threads",
-  },
-  {
-    value: "members",
-    icon: Users,
-    label: "Members",
-    route: "/communities/members",
-  },
-  {
-    value: "activity",
-    icon: LogOut,
-    label: "Activity",
-    route: "/communities/activity",
   },
 ];

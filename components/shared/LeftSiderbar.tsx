@@ -3,11 +3,10 @@ import Link from 'next/link'
 import { sidebarLinks } from "@/constants";
 import { usePathname, useRouter } from 'next/navigation'
 import {SignedIn, SignOutButton} from '@clerk/nextjs'
-import { Search, Home, Heart, Users, UserPlus, LogOut } from 'lucide-react'
+import { LogOut } from 'lucide-react';
 
 export default function LeftSidebar() {
   const pathname = usePathname()
-  const router = useRouter()
 
   return (
       <section className='custom-scrollbar w-full h-full transition-all duration-300 ease-in-out px-0 flex flex-col'>
@@ -23,15 +22,17 @@ export default function LeftSidebar() {
             {(() => {
               switch (link.label.toLowerCase()) {
                 case 'home':
-                  return <Home size={24} className={`${isActive ? 'text-blue-400' : 'text-gray-400'}`} />;
+                  return <link.imgURL size={24} className={`${isActive ? 'text-blue-400' : 'text-gray-400'}`} />;
                 case 'search':
-                  return <Search size={24} className={`${isActive ? 'text-blue-400' : 'text-gray-400'}`} />;
+                  return <link.imgURL size={24} className={`${isActive ? 'text-blue-400' : 'text-gray-400'}`} />;
                 case 'activity':
-                  return <Heart size={24} className={`${isActive ? 'text-blue-400' : 'text-gray-400'}`} />;
+                  return <link.imgURL size={24} className={`${isActive ? 'text-blue-400' : 'text-gray-400'}`} />;
+                case 'musicgenerator':
+                  return <link.imgURL size={24} className={`${isActive ? 'text-blue-400' : 'text-gray-400'}`} />;
                 case 'imagegenerator':
-                  return <Users size={24} className={`${isActive ? 'text-blue-400' : 'text-gray-400'}`} />;
+                  return <link.imgURL size={24} className={`${isActive ? 'text-blue-400' : 'text-gray-400'}`} />;
                 case 'community':
-                  return <UserPlus size={24} className={`${isActive ? 'text-blue-400' : 'text-gray-400'}`} />;
+                  return <link.imgURL size={24} className={`${isActive ? 'text-blue-400' : 'text-gray-400'}`} />;
                 default:
                   return;
               }
@@ -47,7 +48,7 @@ export default function LeftSidebar() {
                 <div className='flex cursor-pointer gap-2 lg:gap-5 p-2 justify-center mb-5 hover:bg-gray-800 rounded-lg transition-all duration-300 lg:w-full lg:p-4 w-full ease-in-out'>
                   <div className='flex items-center justify-center'>
                     <LogOut size={24} className="text-gray-400" />
-                  </div>
+                  </div>  
                   <p className='text-light-2 max-lg:hidden text-gray-400 lg:block'>Logout</p>
                 </div>
               </SignOutButton>

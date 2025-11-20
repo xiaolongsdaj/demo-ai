@@ -3,8 +3,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   experimental:{
     serverActions: {},
-    serverComponentsExternalPackages:['mongoose'],
   },
+  serverExternalPackages:['mongoose'],
   /* config options here */
   images:{
     remotePatterns:[
