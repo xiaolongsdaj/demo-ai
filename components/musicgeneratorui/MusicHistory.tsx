@@ -112,7 +112,12 @@ const MusicHistory: React.FC<MusicHistoryProps> = ({ onSelectMusic }) => {
               onClick={() => handleSelectMusic(music)}
             >
               <div className="flex justify-between items-start mb-3">
-                <h3 className="text-lg font-medium text-white">{music.title}</h3>
+                <div>
+                  <h3 className="text-lg font-medium text-white">{music.name || music.title}</h3>
+                  {music.name && music.title && music.name !== music.title && (
+                    <p className="text-xs text-gray-400">{music.title}</p>
+                  )}
+                </div>
                 <span className="text-xs px-2 py-1 rounded-full bg-gray-700 text-gray-300">{music.duration}秒</span>
               </div>
               
@@ -128,6 +133,11 @@ const MusicHistory: React.FC<MusicHistoryProps> = ({ onSelectMusic }) => {
                 <span className="text-xs px-2 py-1 rounded-full bg-gray-700/50 text-gray-300">
                   {getTempoLabel(music.tempo)}
                 </span>
+                {music.vocalType && music.vocalType !== 'random' && (
+                  <span className="text-xs px-2 py-1 rounded-full bg-gray-700/50 text-gray-300">
+                    {music.vocalType === 'male' ? '男声' : music.vocalType === 'female' ? '女声' : music.vocalType}
+                  </span>
+                )}
               </div>
               
               <div className="flex justify-between items-center text-xs text-gray-500">

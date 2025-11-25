@@ -3,25 +3,49 @@ import '../../app/globals.css'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect, useRef } from 'react'
-import { OrganizationSwitcher, SignedIn, SignOutButton } from '@clerk/nextjs'
-import { dark } from '@clerk/themes'
+import { SignedIn, SignedOut, SignOutButton } from '@clerk/nextjs'
 import { sidebarLinks } from "@/constants"
 import { usePathname } from 'next/navigation'
-import { LogOut, ChevronDown, Search, Menu, X } from 'lucide-react'
+import { LogOut, ChevronDown, Menu, X } from 'lucide-react'
 
 export default function Topbar() {
   const pathname = usePathname()
-  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [exploreOpen, setExploreOpen] = useState(false) // 探索菜单状态
+  const [userMenuOpen, setUserMenuOpen] = useState(false) // 用户菜单状态
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [navbarVisible, setNavbarVisible] = useState(true)
   const [lastScrollTop, setLastScrollTop] = useState(0)
-  const dropdownRef = useRef<HTMLDivElement>(null)
+  const [userInfo, setUserInfo] = useState({ image: '/user.webp', username: '用户' }) // 用户信息状态
+  
+  const exploreRef = useRef<HTMLDivElement>(null) // 探索菜单ref
+  const userMenuRef = useRef<HTMLDivElement>(null) // 用户菜单ref
   const mobileMenuRef = useRef<HTMLDivElement>(null)
 
   // 分离Home链接和其他链接
   const homeLink = sidebarLinks[0]
   const dropdownLinks = sidebarLinks.slice(1)
+  
+  // 从localStorage获取用户信息，移到组件顶部
+  useEffect(() => {
+    try {
+      // 客户端环境下从localStorage获取用户信息
+      if (typeof window !== 'undefined' && localStorage) {
+        const storedUserInfo = localStorage.getItem('demo-ai-user-info');
+        if (storedUserInfo) {
+          const parsed = JSON.parse(storedUserInfo);
+          if (parsed && (parsed.image || parsed.username)) {
+            setUserInfo({
+              image: parsed.image || '/user.webp',
+              username: parsed.username || '用户'
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.error('获取用户信息失败:', error);
+    }
+  }, []);
   
   // 监听滚动事件，为导航栏添加滚动效果和隐藏/显示功能
   useEffect(() => {
@@ -48,8 +72,11 @@ export default function Topbar() {
   // 点击外部区域关闭下拉菜单和移动菜单
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setDropdownOpen(false)
+      if (exploreRef.current && !exploreRef.current.contains(event.target as Node)) {
+        setExploreOpen(false)
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false)
       }
       if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
         setMobileMenuOpen(false)
@@ -169,23 +196,26 @@ export default function Topbar() {
             </Link>
             
             {/* Dropdown Menu for other links */}
-            <div className="relative" ref={dropdownRef}>
+            <div className="relative" ref={exploreRef}>
               <button
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-full transition-all duration-400 bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 hover:text-white hover:scale-105 ${dropdownOpen ? 'bg-gray-700/70 text-white scale-105' : ''}`}
-                aria-expanded={dropdownOpen}
+                onClick={() => {
+                  setExploreOpen(!exploreOpen);
+                  setUserMenuOpen(false); // 点击探索时关闭用户菜单
+                }}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-full transition-all duration-400 bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 hover:text-white hover:scale-105 ${exploreOpen ? 'bg-gray-700/70 text-white scale-105' : ''}`}
+                aria-expanded={exploreOpen}
                 aria-haspopup="true"
               >
-                <span className="hidden lg:inline-block font-medium">Discover</span>
+                <span className="hidden lg:inline-block font-medium">探索</span>
                 <ChevronDown 
                   size={18} 
-                  className={`transition-transform duration-500 ease-in-out ${dropdownOpen ? 'rotate-180' : ''}`} 
+                  className={`transition-transform duration-500 ease-in-out ${exploreOpen ? 'rotate-180' : ''}`} 
                 />
               </button>
               
               {/* Dropdown content with enhanced animation */}
               <div 
-                className={`absolute top-full left-0 mt-2 w-60 rounded-xl shadow-2xl bg-gray-800/95 backdrop-blur-md border border-gray-700/50 z-50 overflow-hidden transition-all duration-500 ease-out transform origin-top-left ${dropdownOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-[-8px] pointer-events-none'}`}
+                className={`absolute top-full left-0 mt-2 w-60 rounded-xl shadow-2xl bg-gray-800/95 backdrop-blur-md border border-gray-700/50 z-50 overflow-hidden transition-all duration-500 ease-out transform origin-top-left ${exploreOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-[-8px] pointer-events-none'}`}
                 aria-label="Navigation menu"
               >
                 <div className="py-1">
@@ -197,7 +227,7 @@ export default function Topbar() {
                         key={link.label}
                         href={link.route}
                         className={`flex items-center gap-3 px-5 py-3.5 w-full text-left transition-all duration-400 transform hover:translate-x-1 ${isActive ? 'bg-gradient-to-r from-blue-600/90 to-indigo-600/90 text-white' : 'text-gray-300 hover:bg-gray-700/60 hover:text-white'}`}
-                        onClick={() => setDropdownOpen(false)}
+                        onClick={() => setExploreOpen(false)}
                         aria-current={isActive ? 'page' : undefined}
                       >
                         <div className={`flex items-center justify-center w-8 h-8 rounded-lg transition-transform duration-300 ${isActive ? 'bg-white/20' : 'bg-gray-700/50'}`}>
@@ -214,31 +244,55 @@ export default function Topbar() {
 
           {/* Right section with user controls */}
             <div className='flex items-center gap-3'>
-              {/* 搜索按钮（可选）- 保持与现有设计的一致性 */}
-              <Link 
-                href="/search" 
-                className="hidden sm:flex items-center justify-center w-10 h-10 rounded-full bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 transition-all duration-400 transform hover:scale-110 hover:bg-blue-900/20" 
-              >
-                <Search size={18} className="transition-transform duration-300 hover:scale-110" />
-              </Link>
               
+              {/* 未登录状态显示登录按钮 */}
+              <SignedOut>
+                <Link href="/sign-in" className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium transition-all duration-400 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/30">
+                  <span className="text-sm font-medium">登录</span>
+                </Link>
+              </SignedOut>
+              
+              {/* 登录状态显示用户头像和下拉菜单 */}
               <SignedIn>
-                <SignOutButton redirectUrl="/sign-in">
-                  <button className='flex items-center gap-2 px-4 py-2.5 rounded-full bg-gray-800/50 text-gray-300 hover:bg-red-900/30 hover:text-red-400 transition-all duration-400 transform hover:scale-105 group'>
-                    <LogOut size={18} className="transition-transform duration-300 group-hover:rotate-12" />
-                    <span className="text-sm font-medium hidden sm:inline-block">Logout</span>
+                <div className="relative" ref={userMenuRef}>
+                  <button
+                    onClick={() => {
+                      setUserMenuOpen(!userMenuOpen);
+                      setExploreOpen(false); // 点击用户头像时关闭探索菜单
+                    }}
+                    className="flex items-center gap-2 px-3 py-2 rounded-full bg-gray-800/70 border-2 border-transparent hover:border-blue-500/50 transition-all duration-400 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    aria-expanded={userMenuOpen}
+                    aria-haspopup="true"
+                  >
+                    {/* 显示用户头像 */}
+                    <Image 
+                      src={userInfo.image} 
+                      alt={`${userInfo.username}的头像`} 
+                      width={36} 
+                      height={36} 
+                      className="rounded-full object-cover"
+                    />
+                    {/* 显示用户名 */}
+                    <span className="text-sm font-medium text-white hidden sm:inline-block">
+                      {userInfo.username}
+                    </span>
                   </button>
-                </SignOutButton>
+                   
+                  {/* 简化的下拉菜单，仅保留退出功能 */}
+                  <div 
+                    className={`absolute top-full right-0 mt-2 w-40 rounded-xl shadow-2xl bg-gray-800/95 backdrop-blur-md border border-gray-700/50 z-50 overflow-hidden transition-all duration-300 ease-out transform origin-top-right ${userMenuOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-[-8px] pointer-events-none'}`}
+                  >
+                        <div className="py-1">
+                          <SignOutButton redirectUrl="/sign-in">
+                            <button className="flex items-center gap-3 px-5 py-3 w-full text-left transition-all duration-300">
+                              <LogOut size={18} className="text-gray-400" />
+                              <span className="font-medium">退出登录</span>
+                            </button>
+                          </SignOutButton>
+                        </div>
+                      </div>
+                    </div>
               </SignedIn>
-              
-              <OrganizationSwitcher 
-                appearance={{
-                  baseTheme: dark,
-                  elements: {
-                    organizationSwitcherTrigger: "flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-white font-medium transition-all duration-500 hover:from-blue-500/30 hover:to-purple-500/30 transform hover:scale-105 shadow-lg shadow-purple-500/20"
-                  }
-                }} 
-              />
           </div>
         </div>
       </div>

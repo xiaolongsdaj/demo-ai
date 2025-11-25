@@ -27,12 +27,14 @@ export async function POST(req: NextRequest) {
     const generatedMusic: MusicData = {
       id: Date.now().toString(),
       userId: userId, // 添加用户ID
+      name: params.name,
       title: `${params.style.charAt(0).toUpperCase() + params.style.slice(1)} ${params.mood}`,
       description: params.description,
       style: params.style,
       mood: params.mood,
       duration: parseInt(params.duration),
       tempo: params.tempo,
+      vocalType: params.vocalType, // 添加人声类型
       audioUrl: `https://example.com/music_${Date.now()}.mp3`,
       createdAt: new Date().toISOString(),
     };

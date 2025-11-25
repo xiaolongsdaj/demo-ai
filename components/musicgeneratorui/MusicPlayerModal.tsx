@@ -152,13 +152,21 @@ const MusicPlayerModal: React.FC<MusicPlayerModalProps> = ({ isOpen, onClose, mu
           </div>
           
           <div className="text-center mb-6">
-            <h3 className="text-xl font-semibold text-white mb-2">{music.title}</h3>
+            <h3 className="text-xl font-semibold text-white mb-2">{music.name || music.title}</h3>
+            {music.name && music.title && music.name !== music.title && (
+              <p className="text-sm text-gray-400 mb-1">{music.title}</p>
+            )}
             <p className="text-gray-300 mb-3 text-sm md:text-base">{music.description}</p>
             <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 text-xs md:text-sm text-gray-400">
               <span className="px-2 py-1 rounded-full bg-gray-700/30">{styleOptions.find(s => s.value === music.style)?.label || music.style}</span>
               <span className="px-2 py-1 rounded-full bg-gray-700/30">{moodOptions.find(m => m.value === music.mood)?.label || music.mood}</span>
               <span className="px-2 py-1 rounded-full bg-gray-700/30">{music.duration}秒</span>
               <span className="px-2 py-1 rounded-full bg-gray-700/30">{music.tempo === 'slow' ? '慢' : music.tempo === 'fast' ? '快' : '中等'}</span>
+              {music.vocalType && music.vocalType !== 'random' && (
+                <span className="px-2 py-1 rounded-full bg-gray-700/30">
+                  {music.vocalType === 'male' ? '男声' : music.vocalType === 'female' ? '女声' : music.vocalType}
+                </span>
+              )}
             </div>
           </div>
           

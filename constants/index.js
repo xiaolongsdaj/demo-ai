@@ -1,31 +1,33 @@
 import {
-  Search,
   Home,
-  Heart,
   UserPlus,
   Music,
   Image,
   Disc,
-  Radio,
-  FileText,
   PlusSquare,
+  Radio,
 } from "lucide-react";
 //侧边栏遍历
 export const sidebarLinks = [
   {
     imgURL: Home,
     route: "/",
-    label: "Home",
+    label: "首页",
   },
   {
     imgURL: Music,
     route: "/musicGenerator",
-    label: "MusicGenerator",
+    label: "音乐生成器",
   },
   {
     imgURL: Image,
     route: "/imageGenerator",
-    label: "ImageGenerator",
+    label: "图片生成器",
+  },
+  {
+    imgURL: PlusSquare,
+    route: "/musicGenerator/pricing",
+    label: "定价",
   },
 ];
 
@@ -34,8 +36,20 @@ export const musicSidebarLinks = [
   {
     id: "inspiration",
     icon: Music,
-    label: "生成音乐",
+    label: "灵感音乐",
     route: "/musicGenerator",
+  },
+  {
+    id: "custom",
+    icon: Disc,
+    label: "自定义音乐",
+    route: "/musicGenerator/custom",
+  },
+  {
+    id: "radio",
+    icon: Radio,
+    label: "纯音乐",
+    route: "/musicGenerator/instrumental",
   },
   // {
   //   id: 'custom',

@@ -3,24 +3,28 @@ export interface MusicData {
   id: string;
   userId?: string; // 用户ID（可选，用于向后兼容）
   title: string;
+  name: string; // 音乐名称
   description: string;
   style: string;
   mood: string;
   duration: number;
   tempo: string;
+  vocalType?: string; // 人声类型
   audioUrl: string;
   createdAt: string;
 }
 
 // 音乐生成参数类型
 export interface MusicGenerateParams {
+  name: string; // 音乐名称
   description: string;
   style: string;
   mood: string;
   duration: string;
   tempo: string;
-}
-
+  vocalType: string;
+  modelId: string;
+  }
 // API响应类型
 export interface ApiResponse<T> {
   success: boolean;
