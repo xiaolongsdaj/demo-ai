@@ -2,7 +2,7 @@
 import React from 'react';
 import { X, Shield, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { PricingPlan } from './PricingPlanCard';
+import { PricingPlan } from '@/app/api/pricing/route';
 
 interface SubscriptionInfo {
   subscriptionId: string;

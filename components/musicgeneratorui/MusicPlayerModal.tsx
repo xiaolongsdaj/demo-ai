@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useRef, useEffect } from 'react';
 import { MusicData } from '@/interface/music';
-import { getMusicMoods, getMusicStyles } from '@/lib/musicModal';
+import { AI_MODELS_CONFIG, SubscriptionLevel } from '@/lib/musicModel';
 
 // 音乐播放模态框组件
 export interface MusicPlayerModalProps {
@@ -18,8 +18,10 @@ const MusicPlayerModal: React.FC<MusicPlayerModalProps> = ({ isOpen, onClose, mu
   const [audioProgress, setAudioProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
-  const styleOptions = getMusicStyles();
-  const moodOptions = getMusicMoods();
+  // 由于播放器显示不需要订阅级别限制，使用默认的'free'级别获取选项
+  const defaultSubscriptionLevel: SubscriptionLevel = 'free';
+  const styleOptions = AI_MODELS_CONFIG.musicGeneration.musicStyles(defaultSubscriptionLevel);
+  const moodOptions = AI_MODELS_CONFIG.musicGeneration.musicMoods;
   
   useEffect(() => {
     if (!isOpen && audioRef.current) {

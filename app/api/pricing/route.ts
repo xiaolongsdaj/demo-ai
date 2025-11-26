@@ -2,12 +2,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // 定义订阅计划的类型，确保与前端组件一致
-interface PricingFeature {
+ export interface PricingFeature {
   text: string;
   color: string;
+  icon?: React.ReactNode;
 }
 
-interface PricingPlan {
+export interface PricingPlan {
   id: string;
   name: string;
   price: string;
@@ -22,6 +23,7 @@ interface PricingPlan {
   cardClassName?: string;
   buttonClassName?: string;
   details?: string; // 额外的计划详情
+  popularBadge?: string; // 热门计划徽章
   discount?: number; // 折扣百分比
 }
 

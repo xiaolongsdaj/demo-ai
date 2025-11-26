@@ -5,7 +5,7 @@ import { MusicData } from '@/interface/music';
 import { useAuth } from '../../lib/auth';
 import { fetchFromAPI } from '../../lib/api-client';
 import MusicPlayerModal from './MusicPlayerModal';
-import { getMusicMoods, getMusicStyles } from '@/lib/musicModal';
+import { AI_MODELS_CONFIG, SubscriptionLevel } from '@/lib/musicModel';
 
 export interface MusicHistoryProps {
   onSelectMusic?: (music: MusicData) => void;
@@ -21,8 +21,10 @@ const MusicHistory: React.FC<MusicHistoryProps> = ({ onSelectMusic }) => {
   const [error, setError] = useState<string | null>(null);
   const [isPlayerModalOpen, setIsPlayerModalOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const styleOptions = getMusicStyles();
-  const moodOptions = getMusicMoods();
+  // 由于历史记录显示不需要订阅级别限制，使用默认的'free'级别获取选项
+  const defaultSubscriptionLevel: SubscriptionLevel = 'free';
+  const styleOptions = AI_MODELS_CONFIG.musicGeneration.musicStyles(defaultSubscriptionLevel);
+  const moodOptions = AI_MODELS_CONFIG.musicGeneration.musicMoods;
   
   // 确保组件在客户端挂载
   useEffect(() => {

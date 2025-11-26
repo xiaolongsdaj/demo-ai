@@ -1,3 +1,4 @@
+'use client'
 import MusicGeneratorForm from "@/components/musicgeneratorui/MusicGeneratorForm";
 
 export default function InstrumentalMusicGenerator() {

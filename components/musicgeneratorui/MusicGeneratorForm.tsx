@@ -5,88 +5,29 @@ import { fetchFromAPI } from '../../lib/api-client';
 import { useSubscriptionPermissions } from '@/lib/subscription-permissions';
 import MusicPlayerModal from './MusicPlayerModal';
 import { MusicData } from '@/interface/music';
-// 从统一配置文件导入模型相关函数
+// 从统一配置文件导入模型相关函数和类型
 import { 
-  getMusicStyles,//从音乐模态框配置文件导入音乐风格
-  getMusicMoods,//从音乐模态框配置文件导入情感氛围
-  getAvailableDurations,//从音乐模态框配置文件导入可用时长
-  getModelsBySubscriptionLevel,//从音乐模态框配置文件导入根据订阅等级获取模型函数
-  getHumanVoices,//从音乐模态框配置文件导入人声类型
-  //导入参数配置系统
-  parameterConfigs,//从音乐模态框配置文件导入参数配置
-  getVisibleParameters,//从音乐模态框配置文件导入可见参数
-  getParameterDefaultValue,//从音乐模态框配置文件导入默认参数值
-  formatParametersForAPI,//从音乐模态框配置文件导入格式化参数函数
-  ParameterConfig,//从音乐模态框配置文件导入参数配置项
-  ParameterGroup,//从音乐模态框配置文件导入参数组
- } from '@/lib/musicModal';
+  GenerationMode, // 模式类型(inspiration, custom, instrumental)
+  SubscriptionLevel, // 订阅等级类型(free, standard, enterprise)
+  AI_MODELS_CONFIG, // 模型配置
+  parameterConfigs, // 参数配置
 
-/**
- * 音乐生成器表单组件 - 支持多种音乐生成模式
- * 
- * @description 这是一个可配置的音乐生成器表单组件，支持三种主要模式：
- * 1. 灵感音乐模式 - 根据描述生成音乐
- * 2. 自定义音乐模式 - 根据歌词生成音乐
- * 3. 纯音乐模式 - 生成纯器乐音乐
- * 
- * @component
- * @param {Object} props - 组件属性
- * @param {string} props.mode - 生成模式 ('inspiration' | 'custom' | 'instrumental')
- * @param {Object} [props.initialConfig] - 初始配置参数
- * @param {string} [props.initialConfig.musicName] - 初始音乐名称
- * @param {string} [props.initialConfig.musicDescription] - 初始音乐描述（灵感模式）
- * @param {string} [props.initialConfig.lyrics] - 初始歌词（自定义模式）
- * @param {string} [props.initialConfig.musicStyle] - 初始音乐风格
- * @param {string} [props.initialConfig.mood] - 初始情感氛围
- * @param {string} [props.initialConfig.duration] - 初始音乐时长
- * @param {string} [props.initialConfig.tempo] - 初始音乐速度
- * @param {string} [props.initialConfig.vocalType] - 初始人声类型
- * @param {string} [props.initialConfig.modelId] - 初始模型ID
- * @param {string} [props.generateButtonText] - 生成按钮的自定义文本
- * @param {function} [props.onMusicGenerated] - 音乐生成完成后的回调函数
- * @returns {React.ReactElement} 音乐生成器表单组件
- * 
- * @example
- * // 使用灵感音乐模式
- * <MusicGeneratorForm 
- *   mode="inspiration"
- *   initialConfig={{ musicStyle: 'pop', mood: 'happy' }}
- *   generateButtonText="生成灵感音乐"
- * />
- * 
- * @example
- * // 使用自定义音乐模式
- * <MusicGeneratorForm 
- *   mode="custom"
- *   initialConfig={{ musicStyle: 'rock', lyrics: '这是一段歌词...' }}
- *   onMusicGenerated={(musicData) => console.log('音乐已生成:', musicData)}
- * />
- * 
- * @example
- * // 使用纯音乐模式
- * <MusicGeneratorForm 
- *   mode="instrumental"
- *   generateButtonText="生成纯音乐"
- * />
- */
+  getVisibleParameters, // 获取可见参数
+  getModelsForMode, // 获取指定模式下可用的模型
+  getAvailableModes // 获取当前订阅等级下可用的模式
+ } from '@/lib/musicModel';
 
 // 定义组件的Props接口
 type MusicGeneratorFormProps = {
-  // 音乐生成器模式：'inspiration'（灵感音乐）, 'custom'（自定义音乐）, 'instrumental'（纯音乐）
-  mode: 'inspiration' | 'custom' | 'instrumental';
-  // 可选的预设配置，用于覆盖默认值
-  initialConfig?: Record<string, any>;
-  // 自定义生成按钮文本
+  mode: GenerationMode;
   generateButtonText?: string;
-  // 生成音乐后的自定义回调函数
-  onMusicGenerated?: (musicData: MusicData) => void;
+  // onMusicGenerated?: (musicData: MusicData) => void;
 };
 
 const MusicGeneratorForm = ({ 
   mode = 'inspiration',
-  initialConfig = {},
   generateButtonText = '开始创作',
-  onMusicGenerated
+  // onMusicGenerated
 }: MusicGeneratorFormProps) => {
   // 使用统一的认证 Hook
   const { getToken, checkAuth } = useAuth();
@@ -94,32 +35,32 @@ const MusicGeneratorForm = ({
   const { canUseFeature, getSubscriptionDisplayInfo } = useSubscriptionPermissions();//检查用户是否有使用某个功能的权限
   
   // 根据权限判断订阅级别
-  const determineSubscriptionLevel = () => {
-    if (canUseFeature('high-quality')) return 'premium';
+  const determineSubscriptionLevel = (): SubscriptionLevel => {
+    if (canUseFeature('high-quality')) return 'enterprise'; // 原premium改为enterprise
     if (canUseFeature('custom-parameters')) return 'standard';
     return 'free';
   };
   
   // 获取配置数据
-  const styleOptions = getMusicStyles();
-  const moodOptions = getMusicMoods();
-  const humanVoiceOptions = getHumanVoices();
   const subscriptionLevel = determineSubscriptionLevel();
-  const availableDurations = getAvailableDurations(subscriptionLevel);
-  const availableModels = getModelsBySubscriptionLevel(subscriptionLevel);
+  // 使用更新后的API获取选项
+  const styleOptions = AI_MODELS_CONFIG.musicGeneration.musicStyles(subscriptionLevel);
+  const moodOptions = AI_MODELS_CONFIG.musicGeneration.musicMoods;
+  const humanVoiceOptions = AI_MODELS_CONFIG.musicGeneration.humanVoices;
+  const availableDurations = AI_MODELS_CONFIG.musicGeneration.musicDurations(subscriptionLevel);
+  const availableModels = getModelsForMode(mode, subscriptionLevel);
   
   // 初始化参数状态 - 使用统一的参数对象管理所有参数
   const initializeParameters = () => {
     const params: Record<string, any> = {};
+    // 获取可见参数列表
+    const visibleParams = getVisibleParameters(mode, subscriptionLevel);
     
-    // 遍历所有参数配置，设置默认值
+    // 为所有可见参数设置默认值
     parameterConfigs.forEach(param => {
-      // 优先使用initialConfig中的值
-      if (param.id in initialConfig) {
-        params[param.id] = initialConfig[param.id];
-      } else {
-        // 使用模式特定的默认值或全局默认值
-        params[param.id] = getParameterDefaultValue(param.id, mode);
+      // 检查参数是否在可见参数列表中
+      if (visibleParams.some(vp => vp.id === param.id)) {
+        params[param.id] = param.defaultValue;
       }
     });
     
@@ -166,20 +107,6 @@ const MusicGeneratorForm = ({
       handleParameterChange('modelId', availableModels[0].id);
     }
   }, [parameters.modelId, availableModels]);
-  
-  // 获取当前可见的参数（重复定义已删除）
-  
-  // 获取指定分组的参数
-  const getParametersByGroup = (group: ParameterGroup) => {
-    const visibleParams = getCurrentVisibleParameters();
-    return visibleParams.filter(param => param.group === group.id);
-  };
-  
-  // 获取参数的选项（将在后面统一定义）
-  
-  // 渲染单个参数（将在后面统一定义）
-  
-  // 渲染模型选择器已移至组件底部统一实现
     
     // 生成音乐处理函数
     const handleGenerateMusic = async () => {
@@ -191,12 +118,13 @@ const MusicGeneratorForm = ({
       }
 
       // 获取当前模式下可见的参数
-      const visibleParams = getVisibleParameters(mode, subscriptionLevel, parameters);
-      
+      const visibleParams = getVisibleParameters(mode, subscriptionLevel);
+      // console.log(6666666666,visibleParams);
       // 验证必填参数
       for (const param of visibleParams) {
         if (param.required) {
           const value = parameters[param.id];
+          // console.log(1111111111,value);
           if (!value || (typeof value === 'string' && !value.trim())) {
             setError(`请填写${param.label}`);
             setTimeout(() => setError(null), 3000);
@@ -228,9 +156,25 @@ const MusicGeneratorForm = ({
       setError(null);
       
       try {
-        // 使用参数配置系统格式化API请求参数
-        const requestParams = formatParametersForAPI(parameters, mode);
+        // 确保parameters对象存在
+        if (!parameters) {
+          throw new Error('参数对象不存在');
+        }
         
+        // 根据API要求构建正确格式的请求参数，确保所有必需字段都有合理值
+        const requestParams = {
+          name: parameters.name || parameters.musicName || '未命名音乐',
+          description: parameters.description || parameters.musicDescription || '一段音乐', // 确保description不为空
+          style: parameters.style || '流行', // 确保style不为空
+          mood: parameters.mood || '欢快', // 确保mood不为空
+          duration: parameters.duration || '30',
+          tempo: parameters.tempo || 'medium',
+          vocalType: parameters.vocalType || 'none',
+          modelId: parameters.modelId || 'default-model'
+          // 移除mode参数，因为API接口定义中没有此参数
+        };
+        
+        // 调用API生成音乐
         const result = await fetchFromAPI('/api/music/generate', 
           requestParams,
           getToken,
@@ -245,9 +189,9 @@ const MusicGeneratorForm = ({
       setGeneratedMusic(result.data as MusicData);
       
       // 如果提供了自定义回调，则调用
-      if (onMusicGenerated) {
-        onMusicGenerated(result.data as MusicData);
-      }
+      // if (onMusicGenerated) {
+      //   onMusicGenerated(result.data as MusicData);
+      // }
       
       setIsPlayerModalOpen(true);
     } catch (err) {
@@ -277,103 +221,6 @@ const MusicGeneratorForm = ({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showModelDropdown]);
-  
-  // 获取当前模式下可见的参数
-  const getCurrentVisibleParameters = () => {
-    return getVisibleParameters(mode, subscriptionLevel, parameters);
-  };
-  
-  // 根据分组获取参数（重复定义已删除）
-  
-  // 获取参数的选项（如果是select类型）
-  const getParameterOptions = (param: ParameterConfig) => {
-    if (param.options) return param.options;
-    
-    // 根据参数ID返回对应的选项
-    switch (param.id) {
-      case 'musicStyle':
-        return styleOptions;
-      case 'mood':
-        return moodOptions;
-      case 'vocalType':
-        return humanVoiceOptions;
-      case 'duration':
-        return availableDurations;
-      case 'modelId':
-        return availableModels.map(model => ({
-          value: model.id,
-          label: model.name,
-          free: true // 假设所有模型都可在基础级别使用
-        }));
-      default:
-        return [];
-    }
-  };
-  
-  // 渲染单个参数（重复定义已删除）
-
-  
-  // 特殊处理模型选择器（下拉菜单）
-  const renderModelSelector = () => {
-    const modelParam = parameterConfigs.find(p => p.id === 'modelId');
-    if (!modelParam) return null;
-    
-    return (
-      <div>
-        <label className="block text-sm font-medium text-white mb-1">
-          {modelParam.label}
-        </label>
-        <div className="relative">
-          <div 
-            ref={modelSelectorRef}
-            className="w-full p-3 bg-gray-700/40 border border-gray-600/60 rounded-xl flex justify-between items-center cursor-pointer hover:border-indigo-500/50 transition-all"
-            onClick={() => setShowModelDropdown(!showModelDropdown)}
-          >
-            <div className="flex items-center gap-2">
-              <span className="text-yellow-400">⚡</span>
-              <span>{availableModels.find(m => m.id === parameters.modelId)?.name || '选择模型'}</span>
-            </div>
-            <span className={`text-gray-400 transition-transform duration-300 ${showModelDropdown ? 'rotate-180' : ''}`}>▼</span>
-          </div>
-            
-          {/* 模型选择列表 - 仅在showModelDropdown为true时显示 */}
-          {showModelDropdown && (
-            <div ref={dropdownRef} className="absolute top-full left-0 right-0 bg-gray-800/95 backdrop-blur-sm border border-gray-700 rounded-xl shadow-xl z-10 mt-1 overflow-hidden">
-              {availableModels.map((model) => {
-                // 提取版本号用于显示
-                const versionMatch = model.name.match(/v\d+(?:\.\d+)?(?:\+)?/);
-                const version = versionMatch ? versionMatch[0] : '';
-                
-                return (
-                  <div 
-                    key={model.id}
-                    className={`p-3 border-b border-gray-700/50 cursor-pointer hover:bg-gray-700/30 transition-all flex justify-between items-center ${parameters.modelId === model.id ? 'bg-gray-700/40' : ''}`}
-                    onClick={() => {
-                      handleParameterChange('modelId', model.id);
-                      setShowModelDropdown(false); // 选择后关闭下拉菜单
-                    }}
-                  >
-                    <div className="flex items-center gap-2">
-                      {parameters.modelId === model.id && (
-                        <span className="text-green-400 font-bold">✓</span>
-                      )}
-                      <span className="text-yellow-400">⚡</span>
-                      <div>
-                        <div className="text-white font-medium">
-              {model.name}
-            </div>
-                      </div>
-                    </div>
-                    <span className="text-green-400">●</span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -403,7 +250,6 @@ const MusicGeneratorForm = ({
                 {availableModels.map((model) => {
                   // 提取版本号用于显示
                   const versionMatch = model.name.match(/v\d+(?:\.\d+)?(?:\+)?/);
-                  const version = versionMatch ? versionMatch[0] : '';
                    
                   return (
                     <div 

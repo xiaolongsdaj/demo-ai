@@ -75,7 +75,7 @@ class SubscriptionManager {
       // 默认返回免费计划
       return {
         plan: 'free',
-        subscriptionId: 'default-free',
+        subscriptionId: 'sub_free',
         nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         isActive: true,
       };
@@ -144,7 +144,7 @@ class SubscriptionManager {
   updateSubscriptionPlan(plan: SubscriptionPlan): void {
     const subscription: UserSubscription = {
       plan,
-      subscriptionId: `sub_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+      subscriptionId: `sub_${plan}`,
       nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       isActive: true,
     };
@@ -168,13 +168,12 @@ class SubscriptionManager {
   getSubscriptionDisplayInfo(): { planName: string; planKey: string } {
     const subscription = this.getSubscription();
     const planKey = subscription?.plan || 'free';
-    
+
     const planNames: Record<SubscriptionPlan, string> = {
       free: '免费版',
       standard: '标准版',
       enterprise: '企业版',
     };
-    
     return {
       planName: planNames[planKey],
       planKey,
@@ -189,13 +188,13 @@ export const subscriptionManager = new SubscriptionManager();
  * 权限检查Hook，用于在组件中检查用户权限
  */
 export function useSubscriptionPermissions() {
-  const subscription = subscriptionManager.getSubscription();
-  const permissions = subscriptionManager.getPermissions();
+  const subscription = subscriptionManager.getSubscription();//获取用户订阅信息 plan: 'free',subscriptionId,nextBillingDate,isActive
+  const permissions = subscriptionManager.getPermissions();//获取用户权限free,standard,enterprise
   
   return {
     subscription,
     permissions,
-    hasPermission: subscriptionManager.hasPermission.bind(subscriptionManager),
+    hasPermission: subscriptionManager.hasPermission.bind(subscriptionManager),//bind绑定subscriptionManager实例，确保在组件中调用时this指向subscriptionManager
     canUseFeature: subscriptionManager.canUseFeature.bind(subscriptionManager),
     updateSubscriptionPlan: subscriptionManager.updateSubscriptionPlan.bind(subscriptionManager),
     getSubscriptionDisplayInfo: subscriptionManager.getSubscriptionDisplayInfo.bind(subscriptionManager),

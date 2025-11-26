@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { X, Shield, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { PricingPlan } from './PricingPlanCard';
+import { PricingPlan } from '@/app/api/pricing/route';
 
 interface PaymentFormProps {
   selectedPlan: PricingPlan;

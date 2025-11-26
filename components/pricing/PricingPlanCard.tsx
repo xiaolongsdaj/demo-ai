@@ -2,32 +2,9 @@
 import React, { useRef } from 'react';
 import { Check, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { PricingPlan } from '@/app/api/pricing/route';
 
-// 定义订阅计划相关类型
-export interface PricingFeature {
-  text: string;
-  color: string;
-  icon?: React.ReactNode;
-}
 
-export interface PricingPlan {
-  id: string;
-  name: string;
-  price: string;
-  originalPrice?: string; // 原始价格，用于显示折扣
-  period?: string;
-  description: string;
-  featuresTitle: string;
-  features: PricingFeature[];
-  buttonText: string;
-  buttonVariant: 'outline' | 'default' | 'secondary';
-  isHighlighted?: boolean;
-  cardClassName?: string;
-  buttonClassName?: string;
-  details?: string;
-  popularBadge?: string;
-  discount?: number; // 折扣百分比
-}
 
 interface PricingPlanCardProps {
   plan: PricingPlan;

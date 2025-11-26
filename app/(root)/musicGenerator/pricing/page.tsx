@@ -2,12 +2,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { fetchFromAPI } from '@/lib/api-client';
+import { useAuth } from '@/lib/auth'; // 添加认证支持
 
 import PricingPlanCard from '@/components/pricing/PricingPlanCard';
 import PaymentForm from '@/components/pricing/PaymentForm';
 import ConfirmationPage from '@/components/pricing/ConfirmationPage';
 import SuccessPage from '@/components/pricing/SuccessPage';
-import { PricingPlan } from '@/components/pricing/PricingPlanCard';
+
+import { PricingPlan } from '@/app/api/pricing/route';// 引入定价计划接口定义
 import ParticleBackground from '@/components/shared/ParticleBackground';// 引入粒子背景组件
 import { subscriptionManager } from '@/lib/subscription-permissions'; // 引入订阅权限管理
 interface ApiResponse {
@@ -23,6 +26,9 @@ interface ApiResponse {
 type SubscriptionStep = 'planSelection' | 'paymentDetails' | 'confirmation' | 'success';
 // 主页面组件
 function PricingPage() {
+  // 认证支持
+  const { getToken } = useAuth();
+  
   // 状态管理
   const [plans, setPlans] = useState<PricingPlan[]>([]);
   const [selectedPlanId, setSelectedPlanId] = useState<string | undefined>();
@@ -43,26 +49,23 @@ function PricingPage() {
   // 获取订阅计划的函数 - 定义在组件顶部以便在整个组件中访问
   const fetchPlans = async () => {
     try {
-      const response = await fetch('/api/pricing', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      setLoading(true);
+      setError(null);
+      const result = await fetchFromAPI<ApiResponse>('/api/pricing', {}, getToken, 'GET', 15000);
       
-      const data: ApiResponse = await response.json();
-      
-      if (response.ok && data.success && data.plans) {
-        setPlans(data.plans);
-        setLoading(false);
+      if (result.success && result.data && result.data.plans) {
+        setPlans(result.data.plans);
       } else {
-        setError(data.error || '获取订阅计划失败，请稍后再试');
-        setLoading(false);
+        const errorMsg = result.error || '获取订阅计划失败，请稍后再试';
+        setError(errorMsg);
+        console.error('获取订阅计划失败:', errorMsg);
       }
     } catch (err) {
-      setError('获取订阅计划失败，请稍后再试');
+      const errorMessage = err instanceof Error ? err.message : '网络错误，请检查您的连接';
+      setError(errorMessage);
+      console.error('获取订阅计划时发生异常:', err);
+    } finally {
       setLoading(false);
-      console.error('Error fetching plans:', err);
     }
   };
   
@@ -75,24 +78,13 @@ function PricingPage() {
     try {
       setSelectedPlanId(planId);
       setLoading(true);
+      const response = await fetchFromAPI<ApiResponse>('/api/pricing', { planId }, getToken, 'POST');
       
-      const response = await fetch('/api/pricing', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ planId }),
-      });
-      
-      // 解析API响应
-      const data: ApiResponse = await response.json();
-      
-      // 检查响应是否成功
-      if (response.ok && data.success && data.plan) {
-        setSelectedPlan(data.plan);
+      if (response.success && response.data && response.data.plan) {
+        setSelectedPlan(response.data.plan);
         setCurrentStep('paymentDetails');
       } else {
-        setError(data.error || '获取计划详情失败');
+        setError(response.error || '获取计划详情失败');
       }
     } catch (err) {
       console.error('Error fetching plan details:', err);
@@ -115,32 +107,27 @@ function PricingPage() {
   const handlePaymentSubmit = async () => {
     try {
       if (!selectedPlanId) return;
-      const response = await fetch('/api/pricing', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
+      
+      const response = await fetchFromAPI('/api/pricing', 
+        { 
           planId: selectedPlanId, 
           paymentInfo: { email: 'user@example.com' } 
-        }),
-      });
+        }, 
+        getToken, 
+        'PUT'
+      );
       
-      // 解析API响应
-      const data = await response.json();
-      
-      // 检查响应是否成功
-      if (response.ok && data.success) {
+      if (response.success && response.data) {
         // 设置订阅信息
         const subscriptionInfo = {
-          subscriptionId: data.subscriptionId,
-          planName: data.planName,
-          nextBillingDate: data.nextBillingDate,
+          subscriptionId: response.data.subscriptionId,
+          planName: response.data.planName,
+          nextBillingDate: response.data.nextBillingDate,
         };
         setSubscriptionInfo(subscriptionInfo);
         setCurrentStep('confirmation');
       } else {
-        setError(data.error || '支付处理失败');
+        setError(response.error || '支付处理失败');
       }
     } catch (err) {
       console.error('Payment submission error:', err);
@@ -152,8 +139,6 @@ function PricingPage() {
   const handleConfirmSubscription = async () => {
     setSubmitting(true);
     try {
-      // 在实际应用中，这里可能需要额外的确认API调用
-      // 更新本地存储的订阅状态
       if (selectedPlan) {
         subscriptionManager.updateSubscriptionPlan(selectedPlan.id as 'free' | 'standard' | 'enterprise');
         console.log('用户订阅已更新为:', selectedPlan.id);
@@ -182,7 +167,6 @@ function PricingPage() {
       
       {/* 主要内容 */}
       <main className="container mx-auto px-4 py-16 relative z-10">
-        {/* 页面标题 - 统一风格 */}
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">简单透明的定价</h1>
           <p className="text-xl text-white/80 max-w-3xl mx-auto">
