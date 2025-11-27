@@ -40,7 +40,7 @@ export default function AccountPage() {
         language: 'zh-CN'
       }
     };
-
+    
     setUserInfo(mergedInfo);
   }, [user]);
 

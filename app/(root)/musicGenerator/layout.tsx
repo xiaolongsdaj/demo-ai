@@ -11,7 +11,7 @@ export default function MusicGeneratorLayout({ children, }: { children: ReactNod
       <div className="flex-1 ml-[250px] overflow-hidden">
         <main className="h-screen overflow-y-auto min-w-0 bg-gray-950">
           <div className="h-full custom-scrollbar">
-            <div className="p-6 md:p-8 min-h-full">
+            <div className="p-0 md:p-0 min-h-full">
               {children}
             </div>
           </div>

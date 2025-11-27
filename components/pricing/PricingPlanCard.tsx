@@ -10,13 +10,17 @@ interface PricingPlanCardProps {
   plan: PricingPlan;
   onSelectPlan: (planId: string) => void;
   selectedPlanId?: string;
+  disabled?: boolean;
+  isCurrentPlan?: boolean;
 }
 
 // 单个订阅计划卡片组件
 function PricingPlanCard({ 
   plan, 
   onSelectPlan, 
-  selectedPlanId 
+  selectedPlanId,
+  disabled = false,
+  isCurrentPlan = false
 }: PricingPlanCardProps) {
   const isHighlighted = plan.isHighlighted || false;
   const isSelected = selectedPlanId === plan.id;
@@ -24,9 +28,9 @@ function PricingPlanCard({
   
   // 基础样式 - 适应深色主题
   const cardBaseClasses = 'rounded-2xl shadow-md p-8 transition-all duration-300 h-full relative overflow-hidden border-2';
-  const cardClasses = isHighlighted 
-    ? `${cardBaseClasses} ${plan.cardClassName || 'bg-gradient-to-br from-purple-600 to-blue-600'} border-transparent ${isSelected ? 'ring-4 ring-purple-400/30' : 'hover:shadow-xl hover:scale-105'}` 
-    : `${cardBaseClasses} bg-white/10 backdrop-blur-md border-transparent ${isSelected ? 'border-purple-500 ring-4 ring-purple-400/30' : 'hover:shadow-lg hover:bg-white/15'}`;
+  const cardClasses =isCurrentPlan 
+    ? `${cardBaseClasses} ${isCurrentPlan ? 'bg-gradient-to-br from-green-600 to-teal-600' : (plan.cardClassName || 'bg-gradient-to-br from-purple-600 to-blue-600')} border-transparent ${isSelected ? 'ring-4 ring-purple-400/30' : 'hover:shadow-xl hover:scale-105'} ${disabled ? 'opacity-80 cursor-not-allowed' : 'hover:shadow-xl hover:scale-105'}` 
+    : `${cardBaseClasses} bg-white/10 backdrop-blur-md border-transparent ${isSelected ? 'border-purple-500 ring-4 ring-purple-400/30' : 'hover:shadow-lg hover:bg-white/15'} ${disabled ? 'opacity-70 cursor-not-allowed' : ''} ${isCurrentPlan ? 'border-green-500 ring-4 ring-green-400/30' : ''}`;
   
   const featuresBaseClasses = 'rounded-xl p-6 mb-8';
   const featuresClasses = isHighlighted 
@@ -41,7 +45,9 @@ function PricingPlanCard({
   
   // 处理按钮点击
   const handleButtonClick = () => {
-    onSelectPlan(plan.id);
+    if (!disabled) {
+      onSelectPlan(plan.id);
+    }
   };
   
   return (
@@ -61,7 +67,14 @@ function PricingPlanCard({
       
       {/* 计划标题和价格 */}
       <div className={`mb-6 ${isHighlighted ? 'pt-4' : ''}`}>
-        <h2 className={`text-2xl font-bold ${titleTextClasses} mb-2`}>{plan.name}</h2>
+        <div className="flex items-center justify-between mb-2">
+          <h2 className={`text-2xl font-bold ${titleTextClasses}`}>{plan.name}</h2>
+          {isCurrentPlan && (
+            <span className="bg-green-500/80 text-white text-xs font-bold px-3 py-1 rounded-full">
+              当前订阅
+            </span>
+          )}
+        </div>
         <div className="flex items-end gap-2 mb-2">
           <span className={`text-4xl font-bold ${titleTextClasses}`}>{plan.price}</span>
           {plan.period && <span className={`${descTextClasses}`}>{plan.period}</span>}
@@ -93,17 +106,18 @@ function PricingPlanCard({
       </div>
       
       {/* 操作按钮 - 适应深色主题 */}
-      <Button 
-        className={`w-full ${plan.buttonClassName || (isHighlighted ? 'bg-white text-purple-600 hover:bg-white/90' : 'bg-white/10 text-white border border-white/30 hover:bg-white/20')}`}
-        variant={plan.buttonVariant}
-        onClick={(e) => {
-          e.stopPropagation();
-          handleButtonClick();
-        }}
-      >
-        {plan.buttonText}
-        <ChevronRight className="ml-2 w-4 h-4" />
-      </Button>
+        <Button 
+          className={`w-full ${plan.buttonClassName || (isHighlighted ? 'bg-white text-purple-600 hover:bg-white/90' : 'bg-white/10 text-white border border-white/30 hover:bg-white/20')} ${disabled ? 'opacity-50 cursor-not-allowed bg-gray-800/50 border-gray-600' : ''}`}
+          variant={plan.buttonVariant}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleButtonClick();
+          }}
+          disabled={disabled}
+        >
+          {isCurrentPlan ? '当前订阅' : disabled ? '已定阅' : plan.buttonText}
+          {!disabled && !isCurrentPlan && <ChevronRight className="ml-2 w-4 h-4" />}
+        </Button>
     </div>
   );
 }

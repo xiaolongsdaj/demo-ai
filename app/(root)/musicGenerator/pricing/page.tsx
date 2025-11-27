@@ -1,7 +1,7 @@
 'use client'
-import { useState, useEffect, useRef } from 'react';
-import { Loader2, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect } from 'react';
+import Loading from '@/components/ui/Loading';
+import ErrorNotification from '@/components/ui/ErrorNotification';
 import { fetchFromAPI } from '@/lib/api-client';
 import { useAuth } from '@/lib/auth'; // 添加认证支持
 
@@ -12,22 +12,33 @@ import SuccessPage from '@/components/pricing/SuccessPage';
 
 import { PricingPlan } from '@/app/api/pricing/route';// 引入定价计划接口定义
 import ParticleBackground from '@/components/shared/ParticleBackground';// 引入粒子背景组件
-import { subscriptionManager } from '@/lib/subscription-permissions'; // 引入订阅权限管理
+import { subscriptionManager, useSubscriptionPermissions } from '@/lib/subscription-permissions'; // 引入订阅权限管理
 interface ApiResponse {
+  message: string;
   success: boolean;
   plans?: PricingPlan[];
   plan?: PricingPlan;
   error?: string;
-  message: string;
   timestamp?: string;
 }
 
 // 订阅流程状态
 type SubscriptionStep = 'planSelection' | 'paymentDetails' | 'confirmation' | 'success';
+// 订阅等级枚举，用于比较
+const PLAN_RANKING: Record<string, number> = {
+  free: 1,
+  standard: 2,
+  enterprise: 3
+};
+
 // 主页面组件
-function PricingPage() {
+ function PricingPage() {
   // 认证支持
   const { getToken } = useAuth();
+  // 获取用户订阅信息
+  const { subscription, getSubscriptionDisplayInfo } = useSubscriptionPermissions();
+  const currentPlan = subscription?.plan || 'free';
+  const { planName: currentPlanName } = getSubscriptionDisplayInfo();
   
   // 状态管理
   const [plans, setPlans] = useState<PricingPlan[]>([]);
@@ -35,11 +46,11 @@ function PricingPage() {
   const [selectedPlan, setSelectedPlan] = useState<PricingPlan | null>(null);
   const [currentStep, setCurrentStep] = useState<SubscriptionStep>('planSelection');
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>();
   const [submitting, setSubmitting] = useState(false);
+  const [showDowngradeWarning, setShowDowngradeWarning] = useState(false);
   
   // 订阅信息状态保持不变
-  // 与ConfirmationPage组件的SubscriptionInfo接口匹配
   const [subscriptionInfo, setSubscriptionInfo] = useState<{
     subscriptionId: string;
     nextBillingDate: string;
@@ -51,7 +62,7 @@ function PricingPage() {
     try {
       setLoading(true);
       setError(null);
-      const result = await fetchFromAPI<ApiResponse>('/api/pricing', {}, getToken, 'GET', 15000);
+      const result = await fetchFromAPI<ApiResponse>('/api/pricing', {}, getToken, 'GET', 1500);
       
       if (result.success && result.data && result.data.plans) {
         setPlans(result.data.plans);
@@ -73,9 +84,23 @@ function PricingPage() {
     fetchPlans();
   }, []);
   
+  // 检查是否允许选择计划（防止降级）
+  const canSelectPlan = (planId: string): boolean => {
+    const currentRank = PLAN_RANKING[currentPlan];
+    const targetRank = PLAN_RANKING[planId];
+    return targetRank > currentRank;
+  };
+  
   // 处理计划选择 - 调用API获取计划详情
   const handleSelectPlan = async (planId: string) => {
     try {
+      // 检查是否尝试降级
+      if (!canSelectPlan(planId)) {
+        setShowDowngradeWarning(true);
+        return;
+      }
+      
+      setShowDowngradeWarning(false);
       setSelectedPlanId(planId);
       setLoading(true);
       const response = await fetchFromAPI<ApiResponse>('/api/pricing', { planId }, getToken, 'POST');
@@ -107,16 +132,16 @@ function PricingPage() {
   const handlePaymentSubmit = async () => {
     try {
       if (!selectedPlanId) return;
-      
+      const userInfo=localStorage.getItem('demo-ai-user-info');
       const response = await fetchFromAPI('/api/pricing', 
         { 
           planId: selectedPlanId, 
-          paymentInfo: { email: 'user@example.com' } 
+          paymentInfo: { email: userInfo ? JSON.parse(userInfo).email : '' },
+          
         }, 
         getToken, 
         'PUT'
       );
-      
       if (response.success && response.data) {
         // 设置订阅信息
         const subscriptionInfo = {
@@ -152,11 +177,10 @@ function PricingPage() {
       setSubmitting(false);
     }
   };
-  
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-purple-800 to-blue-900 opacity-90"></div>
-      {/* 使用粒子背景组件 */}
       <ParticleBackground 
         className="z-0" 
         particleSizeRange={[1, 5]} // 粒子大小范围
@@ -175,51 +199,64 @@ function PricingPage() {
         </div>
         
         {loading && (
-          <div className="flex justify-center items-center h-96">
-            <div className="text-center">
-              <Loader2 className="w-12 h-12 mx-auto text-blue-400 animate-spin mb-4" />
-              <p className="text-white">加载订阅计划中...</p>
-            </div>
-          </div>
+          <Loading 
+            size="large" 
+            color="text-blue-400" 
+            message="加载订阅计划中..."
+            fullHeight={true}
+            className="h-96"
+          />
         )}
         
         {error && !loading && (
-          <div className="max-w-md mx-auto mt-16 bg-white/10 backdrop-blur-lg p-6 rounded-lg shadow-lg border border-white/20">
-            <div className="flex items-center gap-3 text-pink-300 mb-4">
-              <AlertCircle size={24} />
-              <h3 className="text-xl font-bold text-white">出现错误</h3>
-            </div>
-            <p className="text-white/80 mb-6">{error}</p>
-            <Button 
-              className="w-full bg-white text-purple-800 hover:bg-white/90" 
-              onClick={() => {
-                setError(null);
-                setLoading(true);
-                fetchPlans();
-              }}
-            >
-              重试
-            </Button>
-          </div>
+          <ErrorNotification 
+            error={error}
+          />
         )}
         
         {!loading && !error && (
           <>
             {currentStep === 'planSelection' && (
               <div className="max-w-6xl mx-auto">
+                {/* 当前订阅信息显示 */}
+                <div className="mb-8 text-center">
+                  <p className="text-white/90 font-medium">
+                    当前订阅：<span className="text-blue-300 font-bold">{currentPlanName}</span>
+                  </p>
+                  
+                  {/* 降级警告提示 */}
+                  {showDowngradeWarning && (
+                    <div className="mt-4 p-4 bg-amber-900/30 border border-amber-700/50 rounded-lg text-amber-300 max-w-2xl mx-auto">
+                      <p className="font-medium">不支持直接降级</p>
+                      <p className="text-sm mt-1">如需降级订阅，请联系客户支持。您当前只能选择升级或保持现有计划。</p>
+                    </div>
+                  )}
+                  
+                  {/* 降级限制说明 - 常驻显示 */}
+                  {(currentPlan === 'enterprise' || currentPlan === 'standard') && (
+                    <div className="mt-4 p-3 bg-blue-900/20 border border-blue-700/30 rounded-lg text-blue-300 max-w-2xl mx-auto text-sm">
+                      <p>为保护您的数据和服务连续性，系统不支持直接降级。如需调整订阅计划，请联系我们的客户支持团队。</p>
+                    </div>
+                  )}
+                </div>
+                
                 <div className="grid md:grid-cols-3 gap-8">
-                  {plans.map((plan) => (
-                    <PricingPlanCard
-                      key={plan.id}
-                      plan={{
-                        ...plan,
-                        // 为突出的计划添加紫色主题
-                        cardClassName: plan.isHighlighted ? 'bg-gradient-to-br from-purple-600 to-blue-600' : ''
-                      }}
-                      onSelectPlan={handleSelectPlan}
-                      selectedPlanId={selectedPlanId}
-                    />
-                  ))}
+                  {plans.map((plan) => {
+                    const isPlanAllowed = canSelectPlan(plan.id);
+                    return (
+                      <PricingPlanCard
+                        key={plan.id}
+                        plan={{
+                          ...plan,
+                          cardClassName: plan.isHighlighted ? 'bg-gradient-to-br from-purple-600 to-blue-600' : ''
+                        }}
+                        onSelectPlan={handleSelectPlan}
+                        selectedPlanId={selectedPlanId}
+                        disabled={!isPlanAllowed}
+                        isCurrentPlan={plan.id === currentPlan}
+                      />
+                    );
+                  })}
                 </div>
                 
               </div>

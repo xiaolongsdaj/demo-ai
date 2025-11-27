@@ -11,12 +11,11 @@ export default function LeftSidebar() {
   const pathname = usePathname()
   const router = useRouter();
   const { userId } = useAuth();
-  const { user } = useUser();
   const [subscription, setSubscription] = useState<UserSubscription | null>(null);
   
   // 判断是否在音乐生成器页面
   const isMusicGeneratorPage = pathname.includes('/musicGenerator');
-  
+  const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
   // 获取订阅信息
   useEffect(() => {
     if (userId) {
@@ -102,7 +101,7 @@ export default function LeftSidebar() {
                         <Volume2 className="w-5 h-5 text-white" />
                       </div>
                       <div className="hidden md:block text-center">
-                        <p className="text-sm font-medium">当前用户: {user?.emailAddresses[0]?.emailAddress || ''}</p>
+                        <p className="text-sm font-medium">当前用户: {userInfo?.userName || ''}</p>
                         <SignOutButton>
                           <button className="mt-2 px-3 py-1 text-xs text-gray-300 hover:text-white bg-gray-800/50 hover:bg-gray-700/50 rounded-md transition-all duration-200">
                             登出

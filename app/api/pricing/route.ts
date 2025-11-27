@@ -62,7 +62,7 @@ const pricingPlans: PricingPlan[] = [
       { text: '1080p高清音频', color: 'text-green-500' },
       { text: '优先技术支持', color: 'text-green-500' }
     ],
-    buttonText: '立即订阅',
+    buttonText: '升级订阅',
     buttonVariant: 'default',
     isHighlighted: true,
     cardClassName: 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white',
@@ -85,7 +85,7 @@ const pricingPlans: PricingPlan[] = [
       { text: '专属客户经理', color: 'text-green-500' },
       { text: '团队协作功能', color: 'text-green-500' }
     ],
-    buttonText: '立即订阅',
+    buttonText: '升级订阅',
     buttonVariant: 'secondary',
     details: '企业版提供最全面的功能和服务，支持团队协作和企业级需求。'
   }

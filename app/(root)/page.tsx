@@ -2,12 +2,22 @@
 import Link from 'next/link';
 import { Music, Image } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
+import { useUser } from '@clerk/nextjs';
 import Topbar from '@/components/shared/Topbar';
 import Bottombar from '@/components/shared/Bottombar';
 import ParticleBackground from '@/components/shared/ParticleBackground';
 
 export default function Home() {
-
+  const { user } = useUser();
+  const userInfo = {
+    id: user?.id,
+    userName: user?.username,
+    email: user?.emailAddresses?.[0]?.emailAddress || undefined,
+    image: user?.imageUrl || undefined,
+    createdAt: user?.createdAt?.toISOString() || undefined,
+    lastSignInAt: user?.lastSignInAt?.toISOString() || undefined,
+  }
+  localStorage.setItem('userInfo', JSON.stringify(userInfo));
   // 鼠标跟踪效果
   const mousePosition = useRef({ x: 0, y: 0 });
 

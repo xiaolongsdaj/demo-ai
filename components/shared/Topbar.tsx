@@ -16,7 +16,7 @@ export default function Topbar() {
   const [scrolled, setScrolled] = useState(false)
   const [navbarVisible, setNavbarVisible] = useState(true)
   const [lastScrollTop, setLastScrollTop] = useState(0)
-  const [userInfo, setUserInfo] = useState({ image: '/user.webp', username: '用户' }) // 用户信息状态
+  const [userInfo, setUserInfo] = useState({ image: '/user.webp', userName: '用户' }) // 用户信息状态
   
   const exploreRef = useRef<HTMLDivElement>(null) // 探索菜单ref
   const userMenuRef = useRef<HTMLDivElement>(null) // 用户菜单ref
@@ -25,27 +25,13 @@ export default function Topbar() {
   // 分离Home链接和其他链接
   const homeLink = sidebarLinks[0]
   const dropdownLinks = sidebarLinks.slice(1)
-  
-  // 从localStorage获取用户信息，移到组件顶部
   useEffect(() => {
-    try {
-      // 客户端环境下从localStorage获取用户信息
-      if (typeof window !== 'undefined' && localStorage) {
-        const storedUserInfo = localStorage.getItem('demo-ai-user-info');
-        if (storedUserInfo) {
-          const parsed = JSON.parse(storedUserInfo);
-          if (parsed && (parsed.image || parsed.username)) {
-            setUserInfo({
-              image: parsed.image || '/user.webp',
-              username: parsed.username || '用户'
-            });
-          }
-        }
-      }
-    } catch (error) {
-      console.error('获取用户信息失败:', error);
-    }
+    //从localStorage获取用户信息
+    
+    setUserInfo(JSON.parse(localStorage.getItem('userInfo') || '{}'))
+    console.log(userInfo)
   }, []);
+  
   
   // 监听滚动事件，为导航栏添加滚动效果和隐藏/显示功能
   useEffect(() => {
@@ -267,14 +253,14 @@ export default function Topbar() {
                     {/* 显示用户头像 */}
                     <Image 
                       src={userInfo.image} 
-                      alt={`${userInfo.username}的头像`} 
+                      alt={`${userInfo.userName}的头像`} 
                       width={36} 
                       height={36} 
                       className="rounded-full object-cover"
                     />
                     {/* 显示用户名 */}
                     <span className="text-sm font-medium text-white hidden sm:inline-block">
-                      {userInfo.username}
+                      {userInfo.userName}
                     </span>
                   </button>
                    

@@ -542,5 +542,18 @@
     "vocalType": "random",
     "audioUrl": "https://example.com/music_1764210854070.mp3",
     "createdAt": "2025-11-27T02:34:14.070Z"
+  },
+  {
+    "id": "1764246600874",
+    "userId": "user_35XctvhHcutkJCDVJZFZkG4vhdl",
+    "name": "测似2222",
+    "description": "1211212121",
+    "style": "pop",
+    "mood": "happy",
+    "duration": 15,
+    "tempo": "medium",
+    "vocalType": "random",
+    "audioUrl": "https://example.com/music_1764246600874.mp3",
+    "createdAt": "2025-11-27T12:30:00.874Z"
   }
 ]
