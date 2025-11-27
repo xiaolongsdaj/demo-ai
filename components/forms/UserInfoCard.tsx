@@ -57,7 +57,7 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({ userInfo }) => {
 
   return (
     <div className="bg-white/10 backdrop-blur-lg rounded-lg p-6 shadow-lg border border-white/20">
-      <h2 className="text-xl font-bold text-white mb-6">个人信息与订阅</h2>
+       <h1 className="text-3xl font-bold mb-8 text-center">账户设置</h1>
       
       <div className="flex flex-col md:flex-row gap-6 items-center mb-6">
         {/* 用户头像 */}

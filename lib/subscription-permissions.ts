@@ -99,44 +99,44 @@ class SubscriptionManager {
   /**
    * 获取用户的权限
    */
-  getPermissions(): SubscriptionPermissions {
-    const subscription = this.getSubscription();
-    // 如果没有订阅信息或订阅未激活，返回免费计划权限
-    if (!subscription || !subscription.isActive) {
-      return PLAN_PERMISSIONS.free;
-    }
-    return PLAN_PERMISSIONS[subscription.plan];
-  }
+  // getPermissions(): SubscriptionPermissions {
+  //   const subscription = this.getSubscription();
+  //   // 如果没有订阅信息或订阅未激活，返回免费计划权限
+  //   if (!subscription || !subscription.isActive) {
+  //     return PLAN_PERMISSIONS.free;
+  //   }
+  //   return PLAN_PERMISSIONS[subscription.plan];
+  // }
 
   /**
    * 检查用户是否具有特定权限
    */
-  hasPermission(permission: keyof Omit<SubscriptionPermissions, 'plan'>): boolean {
-    const permissions = this.getPermissions();
-    return !!permissions[permission];
-  }
+  // hasPermission(permission: keyof Omit<SubscriptionPermissions, 'plan'>): boolean {
+  //   const permissions = this.getPermissions();
+  //   return !!permissions[permission];
+  // }
 
   /**
    * 检查用户是否可以使用某个功能
    * 根据不同功能需要的权限进行检查
    */
-  canUseFeature(feature: 'generate-music' | 'custom-parameters' | 'high-quality' | 'team-collaboration'): boolean {
-    const permissions = this.getPermissions();
+  // canUseFeature(feature: 'generate-music' | 'custom-parameters' | 'high-quality' | 'team-collaboration'): boolean {
+  //   const permissions = this.getPermissions();
     
-    switch (feature) {
-      case 'generate-music'://音乐生成功能
-        // 所有用户都可以生成音乐，但免费用户有每日限制
-        return true;
-      case 'custom-parameters':
-        return permissions.hasCustomParameters;//是否有自定义参数
-      case 'high-quality':
-        return permissions.hasHighQualityAudio;//是否有高质量音频
-      case 'team-collaboration':
-        return permissions.hasTeamFeatures;//是否有团队功能
-      default:
-        return false;
-    }
-  }
+  //   switch (feature) {
+  //     case 'generate-music'://音乐生成功能
+  //       // 所有用户都可以生成音乐，但免费用户有每日限制
+  //       return true;
+  //     case 'custom-parameters':
+  //       return permissions.hasCustomParameters;//是否有自定义参数
+  //     case 'high-quality':
+  //       return permissions.hasHighQualityAudio;//是否有高质量音频
+  //     case 'team-collaboration':
+  //       return permissions.hasTeamFeatures;//是否有团队功能
+  //     default:
+  //       return false;
+  //   }
+  // }
 
   /**
    * 更新用户订阅计划（模拟订阅更改）
@@ -189,13 +189,13 @@ export const subscriptionManager = new SubscriptionManager();
  */
 export function useSubscriptionPermissions() {
   const subscription = subscriptionManager.getSubscription();//获取用户订阅信息 plan: 'free',subscriptionId,nextBillingDate,isActive
-  const permissions = subscriptionManager.getPermissions();//获取用户权限free,standard,enterprise
+  // const permissions = subscriptionManager.getPermissions();//获取用户权限free,standard,enterprise
   
   return {
-    subscription,
-    permissions,
-    hasPermission: subscriptionManager.hasPermission.bind(subscriptionManager),//bind绑定subscriptionManager实例，确保在组件中调用时this指向subscriptionManager
-    canUseFeature: subscriptionManager.canUseFeature.bind(subscriptionManager),
+    subscription,//如何使用：在组件中调用获取用户订阅计划
+   // permissions,
+    //hasPermission: subscriptionManager.hasPermission.bind(subscriptionManager),//bind绑定subscriptionManager实例，确保在组件中调用时this指向subscriptionManager
+    //canUseFeature: subscriptionManager.canUseFeature.bind(subscriptionManager),
     updateSubscriptionPlan: subscriptionManager.updateSubscriptionPlan.bind(subscriptionManager),
     getSubscriptionDisplayInfo: subscriptionManager.getSubscriptionDisplayInfo.bind(subscriptionManager),
   };

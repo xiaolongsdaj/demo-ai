@@ -113,7 +113,7 @@ export default function Topbar() {
               <Image src="/logo.webp" alt="logo" width={32} height={32} className="rounded-full object-cover transition-transform duration-700 group-hover:scale-110 rotate-3" />
             </div>
             <p className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 transition-all duration-500 group-hover:from-blue-300 group-hover:to-purple-400 hidden sm:block">
-              AiGenerator
+              音乐创作助手
             </p>
           </Link>
 

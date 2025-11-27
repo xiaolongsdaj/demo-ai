@@ -47,9 +47,6 @@ export default function AccountPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 text-white p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8 text-center">账户设置</h1>
-        
-        {/* 用户信息和订阅组件 */}
         <div className="mb-10">
           <UserInfoCard userInfo={userInfo} />
         </div>

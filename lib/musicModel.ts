@@ -135,10 +135,10 @@ export const AI_MODELS_CONFIG = {
     musicDurations: (subscriptionLevel: SubscriptionLevel) => {
       const durations = [
         { value: "15", label: "15秒", free: true, allowedSubscriptionLevels: ['free', 'standard', 'enterprise'] },
-        { value: "30", label: "30秒", free: false, allowedSubscriptionLevels: ['standard', 'enterprise'] },
-        { value: "60", label: "60秒", free: false, allowedSubscriptionLevels: ['standard', 'enterprise'] },
-        { value: "120", label: "120秒", free: false, allowedSubscriptionLevels: ['enterprise'] },
-        { value: "180", label: "180秒", free: false, allowedSubscriptionLevels: ['enterprise'] }
+        { value: "30", label: "30秒", free: true, allowedSubscriptionLevels: ['standard', 'enterprise'] },
+        { value: "60", label: "60秒", free: true, allowedSubscriptionLevels: ['standard', 'enterprise'] },
+        { value: "120", label: "120秒", free: true, allowedSubscriptionLevels: ['enterprise'] },
+        { value: "180", label: "180秒", free: true, allowedSubscriptionLevels: ['enterprise'] }
       ];
       return durations.filter(duration => 
         !duration.allowedSubscriptionLevels || duration.allowedSubscriptionLevels.includes(subscriptionLevel)
@@ -289,7 +289,7 @@ export const parameterConfigs: ParameterConfig[] = [
     id: 'vocalType',
     label: '人声类型',
     type: 'select',
-    required: false,
+    required: true,
     defaultValue: 'random',
     apiKey: 'vocalType',
     order: 7,

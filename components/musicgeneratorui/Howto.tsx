@@ -1,63 +1,164 @@
 import { Music } from 'lucide-react';
 
-interface StepProps {
-  icon: string;
-  gradientBg: string;
+interface StepData {
+  id: number,
+  icon: string,
   title: string;
-  titleColor: string;
   description: string;
-  hoverBorderColor: string;
-  shadowColor: string;
-}
-
-interface HowtoConfig {
-  title: string;
-  subtitle: string;
-  description: string;
-  steps: StepProps[];
-  className?: string;
 }
 
 interface HowtoProps {
-  config: HowtoConfig;
+  config: {
+    title: string;
+    description: string;
+    steps: StepData[];
+  };
 }
 
 export default function Howto({ config }: HowtoProps) {
-  const { title, subtitle, description, steps, className = '' } = config;
-  return (  
-    <section className={`mb-16 bg-gray-900/70 backdrop-blur-sm rounded-2xl p-8 border border-gray-800/50 shadow-lg relative overflow-hidden opacity-0 translate-y-10 transition-all duration-1000 ease-out scroll-reveal ${className}`}>
-      {/* 装饰元素 */}
-      <div className="absolute -top-20 -right-20 w-64 h-64 bg-pink-600/10 rounded-full blur-3xl"></div>
-      <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-blue-600/10 rounded-full blur-3xl"></div>
-      
-      <h3 className="text-xl font-semibold mb-6 text-white flex items-center justify-center gap-3 relative z-10">
-        <Music className="w-6 h-6 text-pink-400" />
-        {title}
-      </h3>
-      <p className="mb-2 text-gray-300 text-lg relative z-10 text-center">
-        {subtitle}
-      </p>
-      <p className="mb-10 text-gray-300 text-lg max-w-3xl mx-auto text-center relative z-10">
-        {description}
-      </p>
-    
-      <div className="relative z-10">
-        <div className="hidden md:flex absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500/80 via-purple-500/80 to-pink-500/80 transform -translate-y-1/2 -z-10"></div>
+  // 使用固定样式
+  const transformedSteps = config.steps.map(step => ({
+    ...step,
+    gradientBg: 'from-indigo-600/20 to-purple-600/20',
+    hoverBorderColor: 'border-indigo-400',
+    shadowColor: 'indigo-400'
+  }));
+
+  return (
+    <>
+      <style jsx>{`
+        /* Howto组件样式 */
+        .howto-section {
+          margin-bottom: 4rem;
+          background-color: rgba(17, 24, 39, 0.7);
+          backdrop-filter: blur(8px);
+          border-radius: 1rem;
+          padding: 1.5rem;
+          border: 1px solid rgba(75, 85, 99, 0.5);
+          opacity: 1;
+          transform: none;
+        }
         
-        <div className="flex flex-col md:flex-row gap-8">
-          {steps.map((step, index) => (
-            <div key={index} className={`flex-1 bg-gray-800/60 rounded-xl p-6 border border-gray-700/50 hover:border-${step.hoverBorderColor}/30 transition-all duration-500 transform hover:-translate-y-2 hover:shadow-lg hover:shadow-${step.shadowColor}/10 relative`}>
-              <div className={`absolute -top-6 left-1/2 w-12 h-12 rounded-full ${step.gradientBg} flex items-center justify-center shadow-lg transform -translate-x-1/2`}>
-                <span className="text-2xl font-bold text-white">{step.icon}</span>
+        @media (min-width: 768px) {
+          .howto-section {
+            padding: 2.5rem;
+          }
+        }
+        
+        .section-header {
+          margin-bottom: 2.5rem;
+          text-align: center;
+        }
+        
+        .section-title {
+          font-size: 2rem;
+          font-weight: bold;
+          margin-bottom: 1rem;
+          background: linear-gradient(to right, #60a5fa, #a78bfa);
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.75rem;
+        }
+        
+        .section-description {
+          color: #d1d5db;
+          max-width: 48rem;
+          margin-left: auto;
+          margin-right: auto;
+          font-size: 1.125rem;
+        }
+        
+        .steps-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 1.5rem;
+        }
+        
+        @media (min-width: 768px) {
+          .steps-grid {
+            grid-template-columns: repeat(3, 1fr);
+          }
+        }
+        
+        .step-card {
+          position: relative;
+          border-radius: 0.75rem;
+          padding: 1.5rem;
+          border: 1px solid rgba(107, 114, 128, 0.5);
+          transition: all 0.3s ease;
+          transform: translateY(0);
+        }
+        
+        .step-card:hover {
+          transform: translateY(-0.25rem);
+        }
+        
+        .step-number {
+          position: absolute;
+          top: -1rem;
+          left: -1rem;
+          width: 3rem;
+          height: 3rem;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #6366f1, #a855f7);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-weight: bold;
+          font-size: 1.125rem;
+        }
+        
+        .step-content {
+          padding-top: 1rem;
+        }
+        
+        .step-title {
+          font-size: 1.125rem;
+          font-weight: 500;
+          margin-bottom: 0.75rem;
+        }
+        
+        .step-description {
+          color: #d1d5db;
+        }
+      `}</style>
+      
+      <section className="howto-section">
+        <div className="section-header">
+          <h2 className="section-title">
+            <Music className="w-6 h-6 text-pink-400" />
+            {config.title}
+          </h2>
+          <p className="section-description">{config.description}</p>
+        </div>
+        
+        <div className="steps-grid">
+          {transformedSteps.map((step, index) => (
+            <div 
+              key={index} 
+              className="step-card"
+              style={{ 
+                background: `linear-gradient(135deg, ${step.gradientBg}10, rgba(15, 23, 42, 0.8))`,
+                borderColor: step.hoverBorderColor,
+                boxShadow: `0 10px 15px -3px ${step.shadowColor}20`
+              }}
+            >
+              <div className="step-number">
+                {index + 1}
               </div>
-              <div className="mt-4">
-                <h4 className={`text-xl font-semibold mb-4 ${step.titleColor}`}>{step.title}</h4>
-                <p className="text-gray-300">{step.description}</p>
+              <div className="step-content">
+                <h4 className="step-title" style={{ color: '#a5b4fc' }}>{step.title}</h4>
+                <p className="step-description">{step.description}</p>
               </div>
             </div>
           ))}
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }
