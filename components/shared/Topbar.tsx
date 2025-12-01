@@ -3,10 +3,11 @@ import '../../app/globals.css'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect, useRef } from 'react'
-import { SignedIn, SignedOut, SignOutButton } from '@clerk/nextjs'
+import { SignedIn, SignedOut, SignOutButton, useAuth } from '@clerk/nextjs'
 import { sidebarLinks } from "@/constants"
 import { usePathname } from 'next/navigation'
 import { LogOut, ChevronDown, Menu, X } from 'lucide-react'
+import SignIn from '@/components/forms/SignIn'
 
 export default function Topbar() {
   const pathname = usePathname()
@@ -16,7 +17,9 @@ export default function Topbar() {
   const [scrolled, setScrolled] = useState(false)
   const [navbarVisible, setNavbarVisible] = useState(true)
   const [lastScrollTop, setLastScrollTop] = useState(0)
+  const [showSignIn, setShowSignIn] = useState(false) // 登录表单状态
   const [userInfo, setUserInfo] = useState({ image: '/user.webp', userName: '用户' }) // 用户信息状态
+  const { isSignedIn } = useAuth() // 获取登录状态
   
   const exploreRef = useRef<HTMLDivElement>(null) // 探索菜单ref
   const userMenuRef = useRef<HTMLDivElement>(null) // 用户菜单ref
@@ -26,11 +29,16 @@ export default function Topbar() {
   const homeLink = sidebarLinks[0]
   const dropdownLinks = sidebarLinks.slice(1)
   useEffect(() => {
-    //从localStorage获取用户信息
-    
-    setUserInfo(JSON.parse(localStorage.getItem('userInfo') || '{}'))
-    console.log(userInfo)
-  }, []);
+    //从localStorage获取用户信息，并在isSignedIn状态改变时重新获取
+    const storedUserInfo = localStorage.getItem('userInfo');
+    if (storedUserInfo) {
+      const parsedInfo = JSON.parse(storedUserInfo);
+      // 确保获取到有效数据
+      if (parsedInfo.image && parsedInfo.userName) {
+        setUserInfo(parsedInfo);
+      }
+    }
+  }, [isSignedIn]); 
   
   
   // 监听滚动事件，为导航栏添加滚动效果和隐藏/显示功能
@@ -55,7 +63,7 @@ export default function Topbar() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [lastScrollTop])
   
-  // 点击外部区域关闭下拉菜单和移动菜单
+  // 点击外部区域关闭下拉菜单、移动菜单和登录框
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (exploreRef.current && !exploreRef.current.contains(event.target as Node)) {
@@ -73,7 +81,7 @@ export default function Topbar() {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [])
+  }, [showSignIn])
   
   // 处理窗口大小变化，在大屏幕上自动关闭移动菜单
   useEffect(() => {
@@ -88,6 +96,7 @@ export default function Topbar() {
   }, [])
 
   return (
+    <>
     <nav className={`fixed top-0 left-0 right-0 z-50 transform transition-all duration-300 cubic-bezier(0.34, 1.56, 0.64, 1) ${scrolled ? 'bg-gray-900/95 backdrop-blur-md shadow-lg shadow-black/20 py-2' : 'bg-gray-900/80 py-3'} ${navbarVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'}`}>
       {/* 添加一个细微的分隔线作为视觉辅助 */}
       <div className={`absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent transform origin-bottom transition-transform duration-300 ${navbarVisible ? 'scale-x-100' : 'scale-x-0'}`}></div>
@@ -233,9 +242,12 @@ export default function Topbar() {
               
               {/* 未登录状态显示登录按钮 */}
               <SignedOut>
-                <Link href="/sign-in" className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium transition-all duration-400 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/30">
+                <button
+                  onClick={() => setShowSignIn(true)}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium transition-all duration-400 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/30"
+                >
                   <span className="text-sm font-medium">登录</span>
-                </Link>
+                </button>
               </SignedOut>
               
               {/* 登录状态显示用户头像和下拉菜单 */}
@@ -269,7 +281,7 @@ export default function Topbar() {
                     className={`absolute top-full right-0 mt-2 w-40 rounded-xl shadow-2xl bg-gray-800/95 backdrop-blur-md border border-gray-700/50 z-50 overflow-hidden transition-all duration-300 ease-out transform origin-top-right ${userMenuOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-[-8px] pointer-events-none'}`}
                   >
                         <div className="py-1">
-                          <SignOutButton redirectUrl="/sign-in">
+                          <SignOutButton redirectUrl="/">
                             <button className="flex items-center gap-3 px-5 py-3 w-full text-left transition-all duration-300">
                               <LogOut size={18} className="text-gray-400" />
                               <span className="font-medium">退出登录</span>
@@ -283,5 +295,10 @@ export default function Topbar() {
         </div>
       </div>
     </nav>
+      <SignIn 
+      show={showSignIn} 
+      onClose={() => setShowSignIn(false)} 
+      />
+    </>
   )
 }

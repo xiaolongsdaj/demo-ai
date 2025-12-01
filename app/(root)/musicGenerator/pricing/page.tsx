@@ -240,7 +240,7 @@ const PLAN_RANKING: Record<string, number> = {
                   )}
                 </div>
                 
-                <div className="grid md:grid-cols-3 gap-8">
+                <div className="grid md:grid-cols-3 gap-8 mb-16">
                   {plans.map((plan) => {
                     const isPlanAllowed = canSelectPlan(plan.id);
                     return (

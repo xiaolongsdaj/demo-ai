@@ -555,5 +555,18 @@
     "vocalType": "random",
     "audioUrl": "https://example.com/music_1764246600874.mp3",
     "createdAt": "2025-11-27T12:30:00.874Z"
+  },
+  {
+    "id": "1764412935761",
+    "userId": "user_35XctvhHcutkJCDVJZFZkG4vhdl",
+    "name": "黑凤梨",
+    "description": "一首关于黄家驹的歌曲！",
+    "style": "rock",
+    "mood": "happy",
+    "duration": 120,
+    "tempo": "medium",
+    "vocalType": "male",
+    "audioUrl": "https://example.com/music_1764412935761.mp3",
+    "createdAt": "2025-11-29T10:42:15.761Z"
   }
 ]

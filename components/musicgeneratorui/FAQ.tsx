@@ -143,17 +143,20 @@ export default function FAQ({ config }: FAQProps) {
         }
         
         .faq-answer {
-          padding: 1rem 1.5rem;
+          padding: 0 1.5rem;
           background-color: rgba(17, 24, 39, 0.3);
           color: #d1d5db;
           max-height: 0;
           overflow: hidden;
-          transition: max-height 0.3s ease;
+          transition: all 0.3s ease;
           border-top: 1px solid rgba(55, 65, 81, 1);
+          opacity: 0;
         }
         
         .faq-answer.open {
           max-height: 24rem;
+          padding: 1rem 1.5rem;
+          opacity: 1;
         }
       `}</style>
       

@@ -3,12 +3,15 @@ import Link from 'next/link';
 import { Music, Image } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
+import SignIn from '@/components/forms/SignIn';
 import Topbar from '@/components/shared/Topbar';
 import Bottombar from '@/components/shared/Bottombar';
 import ParticleBackground from '@/components/shared/ParticleBackground';
 
 export default function Home() {
   const { user } = useUser();
+  const [showSignIn, setShowSignIn] = useState(false); // 控制登录组件显示
+  
   const userInfo = {
     id: user?.id,
     userName: user?.username,
@@ -18,6 +21,8 @@ export default function Home() {
     lastSignInAt: user?.lastSignInAt?.toISOString() || undefined,
   }
   localStorage.setItem('userInfo', JSON.stringify(userInfo));
+  
+
   // 鼠标跟踪效果
   const mousePosition = useRef({ x: 0, y: 0 });
 
@@ -44,8 +49,6 @@ export default function Home() {
       window.removeEventListener('mousemove', handleMouseMove);
     };
   }, []);
-
-  // 使用可复用的ParticleBackground组件，移除了原有的canvas粒子背景代码
 
   // 创建refs用于观察
   const featuresRef = useRef<HTMLDivElement>(null);
@@ -127,12 +130,26 @@ export default function Home() {
             使用最先进的AI技术，轻松生成原创音乐、伴奏和歌词，将你的创意转化为令人惊叹的作品。
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center w-full max-w-md animate-[fadeIn_2s_ease-in-out]">
-            <Link href="/musicGenerator" className="group w-full">
-              <div className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-medium px-6 py-3 rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/30 flex items-center justify-center gap-2">
-                <Music className="w-5 h-5 group-hover:animate-bounce" />
-                <span>开始创作音乐</span>
+            {user ? (
+              <Link href="/musicGenerator" className="group w-full">
+                <div className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-medium px-6 py-3 rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/30 flex items-center justify-center gap-2">
+                  <Music className="w-5 h-5 group-hover:animate-bounce" />
+                  <span>开始创作音乐</span>
+                </div>
+              </Link>
+            ) : (
+              <div 
+                className="group w-full"
+              >
+                <div
+                onClick={() => setShowSignIn(true)}
+                className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-medium px-6 py-3 rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/30 flex items-center justify-center gap-2"
+                >
+                  <Music className="w-5 h-5 group-hover:animate-bounce" />
+                  <span>开始创作音乐</span>
+                </div>
               </div>
-            </Link>
+            )}
           </div>
           
           {/* 平台亮点统计 */}
@@ -374,11 +391,21 @@ export default function Home() {
         <section ref={ctaRef} className={`container mx-auto px-4 py-16 md:py-20 text-center transform transition-all duration-1000 ${ctaVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
           <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 md:mb-6 animate-[pulse_3s_infinite]">准备好释放你的音乐创造力了吗？</h2>
           <p className="text-base md:text-xl mb-6 md:mb-8 text-gray-300 max-w-2xl mx-auto">加入我们的创作社区，开始你的音乐之旅</p>
-          <Link href="/musicGenerator" className="inline-block w-full max-w-xs group">
-            <div className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white font-medium px-6 py-3 md:py-4 rounded-full transition-all duration-500 transform hover:scale-105 hover:shadow-lg hover:shadow-pink-500/30 group-hover:bg-[length:200%_100%] group-hover:animate-gradient-x">
-              立即开始创作
+          {user ? (
+            <Link href="/musicGenerator" className="inline-block w-full max-w-xs group">
+              <div className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white font-medium px-6 py-3 md:py-4 rounded-full transition-all duration-500 transform hover:scale-105 hover:shadow-lg hover:shadow-pink-500/30 group-hover:bg-[length:200%_100%] group-hover:animate-gradient-x">
+                立即开始创作
+              </div>
+            </Link>
+          ) : (
+              <div className="inline-block w-full max-w-xs group">
+                <div
+                  onClick={() => setShowSignIn(true)}
+                  className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white font-medium px-6 py-3 md:py-4 rounded-full transition-all duration-500 transform hover:scale-105 hover:shadow-lg hover:shadow-pink-500/30 group-hover:bg-[length:200%_100%] group-hover:animate-gradient-x">
+                  立即开始创作
+              </div>
             </div>
-          </Link>
+          )}
           
           {/* 小音符装饰 */}
           <div className="absolute -bottom-10 right-10 opacity-20 hidden md:block">
@@ -389,6 +416,12 @@ export default function Home() {
         {/* 底部导航栏 - 仅在根路径显示 */}
         <Bottombar />
       </div>
+      
+      {/* 登录组件，当未登录且点击按钮时显示 */}
+      <SignIn 
+        show={showSignIn} 
+        onClose={() => setShowSignIn(false)} 
+      />
     </div>
   );
 }

@@ -1,7 +1,5 @@
 import { getAuthHeaders } from './auth';
-/**
- * API 请求响应接口
- */
+
 export interface ApiResponse<T = any> {
   success: boolean;
   data: T | null;
@@ -15,19 +13,13 @@ export async function fetchFromAPI<T = any>(
   timeout: number = 30000
 ): Promise<ApiResponse<T>> {
   try {
-    // 构建请求 URL
-    const fullUrl = url.startsWith('/') ? url : `/${url}`;
-    let requestUrl = fullUrl;
-    
-    const headers = await getAuthHeaders(getToken);
-
+    const headers = await getAuthHeaders(getToken)
     // 构建请求选项
     const requestOptions: RequestInit = {
       method,
       headers,
       credentials: 'include', // 包含 cookies，Clerk 可能会使用
     };
-
     // 处理请求参数
     if (params && Object.keys(params).length > 0) {
       if (method === 'GET') {
@@ -38,7 +30,7 @@ export async function fetchFromAPI<T = any>(
             searchParams.append(key, String(value));
           }
         });
-        requestUrl = `${fullUrl}?${searchParams.toString()}`;
+        url = `${url}?${searchParams.toString()}`;
       } else {
         // 非 GET 请求添加 body
         requestOptions.body = JSON.stringify(params);
@@ -51,7 +43,7 @@ export async function fetchFromAPI<T = any>(
     
     try {
       requestOptions.signal = controller.signal;
-      const response = await fetch(requestUrl, requestOptions);
+      const response = await fetch(url, requestOptions);
       clearTimeout(timeoutId);
 
       if (!response.ok) {

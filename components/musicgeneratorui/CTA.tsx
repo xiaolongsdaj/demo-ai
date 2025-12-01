@@ -104,16 +104,14 @@ const CTA: React.FC<CTAProps> = ({ config }) => {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 0.75rem;
+          gap: 1rem;
         }
         
-        @media (min-width: 640px) {
-          .buttons-container {
-            flex-direction: row;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 1.5rem;
-          }
+        .status-indicators {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          gap: 0.5rem;
         }
         
         .cta-button {
@@ -142,7 +140,8 @@ const CTA: React.FC<CTAProps> = ({ config }) => {
           )}
           
           <div className="buttons-container">
-            {transformedButtons.map((button, index) => (
+            {/* 第一个按钮保持为按钮样式 */}
+            {transformedButtons.slice(0, 1).map((button, index) => (
               <button
                 key={index}
                 className={`cta-button ${button.className}`}
@@ -150,6 +149,19 @@ const CTA: React.FC<CTAProps> = ({ config }) => {
                 {button.text}
               </button>
             ))}
+            
+            {/* 后面的按钮转换为状态文本，保持在下方 */}
+            <div className="status-indicators">
+              {transformedButtons.slice(1).map((button, index) => (
+                <div 
+                  key={index}
+                  className="text-indigo-400 font-medium flex items-center gap-1"
+                >
+                  <span className="inline-block w-2 h-2 rounded-full bg-green-400"></span>
+                  {button.text}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
